@@ -15,8 +15,9 @@ def run_circle():
         y = r * math.sin(theta) + cy
         
         clear_canvas_now()
+        grass.draw_now(400,30)
         boy.draw_now(x,y)
-        delay(0.1)
+        delay(0.01)
 def run_rectangle():
     run_top()
     run_right()
@@ -24,18 +25,16 @@ def run_rectangle():
     run_left()
 
 def run_top():
-    pass
+    print('TOP')
 def run_right():
-    pass
+    print('RIGHT')
 def run_bottom():
-    pass
-def run_top():
-    pass
+    print('BOTTOM')
+def run_left():
+    print('LEFT')
 
 while True:
-    run_circle()
+    #run_circle()
     run_rectangle()
-    delay(0.01)
-
-close_canvas()
+    break
 
