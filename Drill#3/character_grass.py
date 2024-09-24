@@ -1,5 +1,4 @@
 from pico2d import *
-import math
 
 open_canvas()
 
@@ -8,6 +7,7 @@ boy = load_image('character.png')
 
 def draw_boy(x,y):
     clear_canvas_now()
+    grass.draw_now(400, 30)
     boy.draw_now(x,y)
     delay(0.01)
 
@@ -20,27 +20,53 @@ def run_circle():
         y = r * math.sin(theta) + cy
         
         draw_boy(x,y)
+        
 def run_rectangle():
     run_top()
     run_right()
     run_bottom()
     run_left()
 
-    draw_boy(x,y)
+def run_triangle():
+    run_bottom()
+    run_diagonalLeft()
+    run_diagonalRight()
 
 def run_top():
-    print('TOP')
-    for x in range(0, 800, 10):
+    for x in range(20, 780, 10):
         draw_boy(x, 550)
+        
 def run_right():
-    print('RIGHT')
+    for y in range(550, 90, -10):
+        draw_boy(780,y)
+        
 def run_bottom():
-    print('BOTTOM')
+    for x in range(780, 20, -10):
+        draw_boy(x, 90)
+        
 def run_left():
-    print('LEFT')
+    for y in range(90, 550, 10):
+        draw_boy(20, y)
+
+def run_diagonalLeft():
+    for r in range(0, 600, 10):
+        cx, cy = 20, 90
+        theta = 70
+        x = r * math.cos(theta) + cx
+        y = r * math.sin(theta) + cy
+        draw_boy(x,y)
+
+def run_diagonalRight():
+    for r in range(10, 600, 10):
+        cx, cy = 390,550
+        theta = 200
+        x = r * math.cos(theta) + cx
+        y = r * math.sin(theta) + cy
+        draw_boy(x,y)
 
 while True:
-    #run_circle()
+    run_circle()
     run_rectangle()
+    run_triangle()
     break
 
