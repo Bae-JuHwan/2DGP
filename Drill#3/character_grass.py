@@ -68,5 +68,3 @@ while True:
     run_circle()
     run_rectangle()
     run_triangle()
-    break
-
