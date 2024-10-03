@@ -13,38 +13,40 @@ running = True
 frame = 0
 
 char_x, char_y = TUK_WIDTH // 2, TUK_HEIGHT // 2
-
 hand_x, hand_y = random.randint(0, TUK_WIDTH), random.randint(0, TUK_HEIGHT)
 
-speed = 3
-
+speed = 0.01
+t = 0.0
 dir = 1
+
+p1_x, p1_y = char_x, char_y
+p2_x, p2_y = hand_x, hand_y
 
 while running:
     clear_canvas()
     TUK_ground.draw(TUK_WIDTH // 2, TUK_HEIGHT // 2)
 
-    dx, dy = hand_x - char_x, hand_y - char_y
-    distance = math.sqrt(dx ** 2 + dy ** 2)
+    if t <= 1:
+        char_x = (1 - t) * p1_x + t * p2_x
+        char_y = (1 - t) * p1_y + t * p2_y
+        t += speed
 
-    if distance > speed:
-        char_x += speed * (dx / distance)
-        char_y += speed * (dy / distance)
-
-        if dx > 0 :
+        if p2_x > p1_x:
             dir = 1
         else:
             dir = -1
     else:
-        hand_x, hand_y = random.randint(0, TUK_WIDTH), random.randint(0, TUK_HEIGHT)
+        p1_x, p1_y = p2_x, p2_y
+        p2_x, p2_y = random.randint(0, TUK_WIDTH), random.randint(0, TUK_HEIGHT)
+        t = 0.0
 
-    hand.draw(hand_x, hand_y)
+    hand.draw(p2_x, p2_y)
 
     if dir == 1:
         character.clip_draw(frame * 100, 100 * 1, 100, 100, char_x, char_y)
     else:
         character.clip_composite_draw(frame * 100, 100 * 1, 100, 100, 0, 'h', char_x, char_y, 100, 100)
-    
+
     update_canvas()
     frame = (frame + 1) % 8
 
