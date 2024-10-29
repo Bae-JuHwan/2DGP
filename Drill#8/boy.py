@@ -97,8 +97,8 @@ class AutoRun:
     def enter(boy, e):
         if is_key_pressed(e):
             boy.action = 1
-            boy.dir = 1
             boy.speed = 1
+            boy.dir = 1
             boy.start_time = get_time()
 
     @staticmethod
@@ -120,18 +120,23 @@ class AutoRun:
         boy.x += boy.dir * boy.speed
 
         if current_time - boy.start_time >= 5:
-            boy.action = 3
-            boy.state_machine.add_event(('TIME_OUT', 0))
+            if boy.dir == 1:
+                boy.action = 3
+                boy.state_machine.add_event(('TIME_OUT', 0))
+
+            elif boy.dir == -1:
+                boy.action = 2
+                boy.state_machine.add_event(('TIME_OUT', 0))
 
     @staticmethod
     def draw(boy):
         if boy.dir == 1:
             boy.image.clip_draw(
-                boy.frame * 100, boy.action * 100, 100, 100, boy.x, boy.y
+                boy.frame * 100, boy.action * 100, 100, 100, boy.x, boy.y + 25, 200, 200
             )
         elif boy.dir == -1:
             boy.image.clip_draw(
-                boy.frame * 100, boy.action * 0, 100, 100, boy.x, boy.y
+                boy.frame * 100, boy.action * 0, 100, 100, boy.x, boy.y + 25, 200, 200
             )
 
 class Boy:
@@ -147,7 +152,7 @@ class Boy:
             {
                 Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep, is_key_pressed: AutoRun},
                 Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, is_key_pressed: AutoRun},
-                AutoRun: {is_key_pressed: AutoRun, right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Idle},
+                AutoRun: {is_key_pressed: Idle, right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Idle},
                 Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down: Idle, is_key_pressed: AutoRun}
             }
         )
