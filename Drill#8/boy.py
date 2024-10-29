@@ -1,11 +1,7 @@
+from logging import currentframe
+
 from pico2d import load_image, get_time
-from sdl2 import SDLK_a
-
-from State_machine import StateMachine, time_out, space_down, right_down, left_down, right_up, left_up, start_event
-
-
-def is_key_pressed(SDLK_a):
-    pass
+from State_machine import StateMachine, time_out, space_down, right_down, left_down, right_up, left_up, start_event, is_key_pressed
 
 class Idle:
     @staticmethod
@@ -18,15 +14,6 @@ class Idle:
         elif right_up(e) or left_down(e) or start_event(e):
             boy.action = 3
             boy.face_dir = 1
-
-        elif is_key_pressed(e):
-            if boy.dir == 1:
-                boy.action = 1
-                boy.dir = 1
-
-            elif boy.dir == -1:
-                boy.action = 0
-                boy.dir = -1
 
         boy.frame = 0
         boy.dir = 0
@@ -104,7 +91,48 @@ class Run:
         boy.image.clip_draw(
             boy.frame * 100, boy.action * 100, 100,100, boy.x, boy.y
         )
-        pass
+
+class AutoRun:
+    @staticmethod
+    def enter(boy, e):
+        if is_key_pressed(e):
+            boy.action = 1
+            boy.dir = 1
+            boy.speed = 1
+            boy.start_time = get_time()
+
+    @staticmethod
+    def exit(boy, e):
+        boy.speed = 1
+
+    @staticmethod
+    def do(boy):
+        current_time = get_time()
+
+        boy.speed += 0.1
+
+        if boy.x < 0:
+            boy.dir = 1
+        elif boy.x > 800:
+            boy.dir = -1
+
+        boy.frame = (boy.frame + 1) % 8
+        boy.x += boy.dir * boy.speed
+
+        if current_time - boy.start_time >= 5:
+            boy.action = 3
+            boy.state_machine.add_event(('TIME_OUT', 0))
+
+    @staticmethod
+    def draw(boy):
+        if boy.dir == 1:
+            boy.image.clip_draw(
+                boy.frame * 100, boy.action * 100, 100, 100, boy.x, boy.y
+            )
+        elif boy.dir == -1:
+            boy.image.clip_draw(
+                boy.frame * 100, boy.action * 0, 100, 100, boy.x, boy.y
+            )
 
 class Boy:
     def __init__(self):
@@ -117,9 +145,10 @@ class Boy:
         self.state_machine.start(Idle) # 객체를 생성한게 아니고 직접 Idle이라는 클래스를 사용함
         self.state_machine.set_transitions(
             {
-                Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep},
-                Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle},
-                Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down: Idle}
+                Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep, is_key_pressed: AutoRun},
+                Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, is_key_pressed: AutoRun},
+                AutoRun: {is_key_pressed: AutoRun, right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Idle},
+                Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down: Idle, is_key_pressed: AutoRun}
             }
         )
 
@@ -132,7 +161,6 @@ class Boy:
         self.state_machine.add_event(
             ('INPUT', event)
         )
-        pass
 
     def draw(self):
         self.state_machine.draw()

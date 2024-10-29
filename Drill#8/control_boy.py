@@ -29,7 +29,6 @@ def reset_world():
 
     grass = Grass()
     world.append(grass)
-
     boy = Boy()
     world.append(boy)
 

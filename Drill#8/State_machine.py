@@ -1,7 +1,6 @@
 # event ( 종류 문자열, 실제 값)
 from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDL_KEYUP, SDLK_LEFT, SDLK_a
 
-
 def start_event(e):
     return e[0] == 'START'
 
