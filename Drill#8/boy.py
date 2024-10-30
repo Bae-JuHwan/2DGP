@@ -96,10 +96,19 @@ class AutoRun:
     @staticmethod
     def enter(boy, e):
         if is_key_pressed(e):
-            boy.action = 1
-            boy.speed = 1
-            boy.dir = 1
-            boy.start_time = get_time()
+            if boy.dir == 0:
+                boy.dir = 1
+
+            if is_key_pressed(e):
+                if boy.dir == 1:
+                    boy.speed = 1
+                    boy.action = 1
+                    boy.start_time = get_time()
+
+                elif boy.dir == -1:
+                    boy.speed = 1
+                    boy.action = 0
+                    boy.start_time = get_time()
 
     @staticmethod
     def exit(boy, e):
