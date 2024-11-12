@@ -68,8 +68,7 @@ class Zombie:
 
     def handle_collision(self, group, other):
         if group == 'boy:zombie':
-            if other in game_world.world[1]:  # 해당 레이어에서 소년이 존재하는지 확인 (예시로 1번 레이어 사용)
-                game_world.remove_object(other)
+            print('Game Over')
 
         elif group == 'newBall:zombie':
             if self.size == 200:
