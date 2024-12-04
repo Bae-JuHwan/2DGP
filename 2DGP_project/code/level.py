@@ -43,11 +43,13 @@ class Level:
 
 		# trees
 		for obj in tmx_data.get_layer_by_name('Trees'):
-			Tree(pos = (obj.x, obj.y),
-				 surf = obj.image,
-				 groups = [self.all_sprites, self.collision_sprites, self.tree_sprites],
-				 name = obj.name,
-				 player_add = self.player_add)
+			Tree(
+				pos = (obj.x, obj.y),
+				surf = obj.image,
+				groups = [self.all_sprites, self.collision_sprites, self.tree_sprites],
+				name = obj.name,
+				player_add = self.player_add
+			)
 
 		# wildflowers
 		for obj in tmx_data.get_layer_by_name('Decoration'):
@@ -80,8 +82,7 @@ class Level:
 		self.player.item_inventory[item] += 1
 
 	def reset(self):
-
-		# apples in the trees
+		# apples on the trees
 		for tree in self.tree_sprites.sprites():
 			for apple in tree.apple_sprites.sprites():
 				apple.kill()

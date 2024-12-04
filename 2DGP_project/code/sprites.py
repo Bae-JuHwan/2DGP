@@ -16,7 +16,7 @@ class Generic(pygame.sprite.Sprite):
 class Interaction(Generic):
     def __init__(self, pos, size, groups, name):
         surf = pygame.Surface(size)
-        super(). __init__(pos, surf, groups)
+        super().__init__(pos, surf, groups)
         self.name = name
 
 class Water(Generic):
@@ -111,4 +111,5 @@ class Tree(Generic):
                     pos = (x,y),
                     surf = self.apple_surf,
                     groups = [self.apple_sprites, self.groups()[0]],
-                    z = LAYERS['fruit'])
+                    z = LAYERS['fruit']
+                )
