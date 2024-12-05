@@ -17,7 +17,7 @@ class Level:
 		self.tree_sprites = pygame.sprite.Group()
 		self.interaction_sprites = pygame.sprite.Group()
 
-		self.soil_layer = SoilLayer(self.all_sprites)
+		self.soil_layer = SoilLayer(self.all_sprites, self.collision_sprites)
 		self.setup()
 		self.overlay = Overlay(self.player)
 		self.transition = Transition(self.reset, self.player)
@@ -86,6 +86,9 @@ class Level:
 		self.player.item_inventory[item] += 1
 
 	def reset(self):
+		# plants
+		self.soil_layer.update_plants()
+
 		#soil
 		self.soil_layer.remove_water()
 
@@ -102,6 +105,7 @@ class Level:
 
 		self.overlay.display()
 
+		# transition overlay
 		if self.player.sleep:
 			self.transition.play()
 
