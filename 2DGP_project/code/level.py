@@ -29,7 +29,7 @@ class Level:
 		self.sky = Sky()
 
 		# shop
-		self.menu = Menu(self.player, self.toggle_shop)
+		self.menu = Menu(self.player, self.toggle_shop, self)
 		self.shop_active = False
 
 		# music
@@ -41,14 +41,31 @@ class Level:
 	def setup(self):
 		tmx_data = load_pygame('../data/map.tmx')
 
-		# house
-		for layer in ['HouseFloor', 'HouseFurnitureBottom']:
-			for x, y, surf in tmx_data.get_layer_by_name(layer).tiles():
-				Generic((x * TILE_SIZE, y * TILE_SIZE), surf, self.all_sprites, LAYERS['house bottom'])
+		# 그룹 생성
+		self.floor_sprites = pygame.sprite.Group()  # 확장할 바닥 타일
+		self.wall_sprites = pygame.sprite.Group()  # 고정된 벽 타일
+		self.furniture_sprites = pygame.sprite.Group()
 
-		for layer in ['HouseWalls', 'HouseFurnitureTop']:
+		# 바닥 타일
+		for layer in ['HouseFloor']:
 			for x, y, surf in tmx_data.get_layer_by_name(layer).tiles():
-				Generic((x * TILE_SIZE, y * TILE_SIZE), surf, self.all_sprites)
+				sprite = Generic((x * TILE_SIZE, y * TILE_SIZE), surf, self.floor_sprites, LAYERS['house bottom'])
+				self.floor_sprites.add(sprite)
+				self.all_sprites.add(sprite)
+
+		# 벽 타일
+		for layer in ['HouseWalls']:
+			for x, y, surf in tmx_data.get_layer_by_name(layer).tiles():
+				sprite = Generic((x * TILE_SIZE, y * TILE_SIZE), surf, self.wall_sprites, LAYERS['house top'])
+				self.wall_sprites.add(sprite)
+				self.all_sprites.add(sprite)
+
+		# 가구
+		for layer in ['HouseFurnitureBottom', 'HouseFurnitureTop']:
+			for x, y, surf in tmx_data.get_layer_by_name(layer).tiles():
+				sprite = Generic((x * TILE_SIZE, y * TILE_SIZE), surf, self.furniture_sprites, LAYERS['house top'])
+				self.furniture_sprites.add(sprite)
+				self.all_sprites.add(sprite)
 
 		# fence
 		for x,y, surf in tmx_data.get_layer_by_name('Fence').tiles():
@@ -105,6 +122,60 @@ class Level:
 	def player_add(self, item):
 		self.player.item_inventory[item] += 1
 		self.success.play()
+
+	def expand_house(self, expansion_factor):
+		# 확장 크기 계산
+		expansion_offset = TILE_SIZE * expansion_factor
+
+		# 바닥 타일 확장
+		new_floor_sprites = pygame.sprite.Group()
+		for sprite in self.floor_sprites:
+			x, y = sprite.rect.topleft
+
+			# 기존 바닥 타일 삭제
+			sprite.kill()
+
+			# 확장된 바닥 영역 생성
+			for i in range(expansion_factor + 1):  # x 방향 확장
+				for j in range(expansion_factor + 1):  # y 방향 확장
+					new_x = x + (i * TILE_SIZE)
+					new_y = y + (j * TILE_SIZE)
+
+					# 새로운 바닥 스프라이트 생성
+					new_sprite = Generic(
+						(new_x, new_y), sprite.image, [self.all_sprites, self.floor_sprites], sprite.z
+					)
+					new_floor_sprites.add(new_sprite)
+
+		# 기존 바닥 그룹 비우기 및 새 바닥 추가
+		self.floor_sprites.empty()
+		self.floor_sprites.add(*new_floor_sprites)
+
+		# 바닥의 확장된 외곽 경계 계산
+		min_x = min(tile.rect.x for tile in self.floor_sprites)
+		max_x = max(tile.rect.x for tile in self.floor_sprites) + TILE_SIZE
+		min_y = min(tile.rect.y for tile in self.floor_sprites)
+		max_y = max(tile.rect.y for tile in self.floor_sprites) + TILE_SIZE
+
+		# 벽 타일 이동
+		for sprite in self.wall_sprites:
+			x, y = sprite.rect.topleft
+
+			# 상단 벽 이동
+			if y < min_y:
+				sprite.rect.y = min_y - TILE_SIZE
+
+			# 하단 벽 이동
+			if y >= max_y:
+				sprite.rect.y = max_y
+
+			# 좌측 벽 이동
+			if x < min_x:
+				sprite.rect.x = min_x - TILE_SIZE
+
+			# 우측 벽 이동
+			if x >= max_x:
+				sprite.rect.x = max_x
 
 	def toggle_shop(self):
 		self.shop_active = not self.shop_active

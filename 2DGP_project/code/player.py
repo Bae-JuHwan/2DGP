@@ -102,6 +102,19 @@ class Player(pygame.sprite.Sprite):
 
         self.image = self.animations[self.status][int(self.frame_index)]
 
+    def expand_house(self):
+        if not hasattr(self, 'house_size'):
+            self.house_size = 1
+
+        if self.house_size >= 5:
+            return
+
+        self.house_size += 1
+
+        if self.money >= 200:
+            self.money -= 200
+            self.house_size += 1
+
     def input(self):
         keys = pygame.key.get_pressed()
 
@@ -123,6 +136,9 @@ class Player(pygame.sprite.Sprite):
                 self.status = 'left'
             else:
                 self.direction.x = 0
+
+            if keys[pygame.K_ESCAPE]:
+                pygame.quit()
 
             # tool use
             if keys[pygame.K_SPACE]:

@@ -3,11 +3,12 @@ from settings import *
 from timer import Timer
 
 class Menu:
-    def __init__(self,player, toggle_menu):
+    def __init__(self,player, toggle_menu, level):
 
         # general setup
         self.player = player
         self.toggle_menu = toggle_menu
+        self.level = level
         self.display_surface = pygame.display.get_surface()
         self.font = pygame.font.Font('../font/LycheeSoda.ttf', 30)
 
@@ -17,7 +18,7 @@ class Menu:
         self.padding = 8
 
         # entries
-        self.options = list(self.player.item_inventory.keys()) + list(self.player.seed_inventory.keys())
+        self.options = list(self.player.item_inventory.keys()) + list(self.player.seed_inventory.keys()) + ["expand the house"]
         self.sell_border = len(self.player.item_inventory) - 1
         self.setup()
 
@@ -79,11 +80,18 @@ class Menu:
                         self.player.money += SALE_PRICES[current_item]
 
                 # buy
-                else:
+                elif current_item != "expand the house":
                     seed_price = PURCHASE_PRICES[current_item]
                     if self.player.money >= seed_price:
                         self.player.seed_inventory[current_item] += 1
-                        self.player.money -= PURCHASE_PRICES[current_item]
+                        self.player.money -= seed_price
+
+                # house expansion
+                elif current_item == "expand the house":
+                    house_expansion_cost = 200
+                    if self.player.money >= house_expansion_cost:
+                        self.player.money -= house_expansion_cost
+                        self.level.expand_house(expansion_factor=2)
 
         # clamp the values
         if self.index < 0:
@@ -101,9 +109,10 @@ class Menu:
         self.display_surface.blit(text_surf, text_rect)
 
         # amount
-        amount_surf = self.font.render(str(amount), False, 'Black')
-        amount_rect = amount_surf.get_rect(midright = (self.main_rect.right - 20, bg_rect.centery))
-        self.display_surface.blit(amount_surf, amount_rect)
+        if amount is not None:
+            amount_surf = self.font.render(str(amount), False, 'Black')
+            amount_rect = amount_surf.get_rect(midright=(self.main_rect.right - 20, bg_rect.centery))
+            self.display_surface.blit(amount_surf, amount_rect)
 
         # selected
         if selected:
@@ -111,6 +120,9 @@ class Menu:
             if self.index <= self.sell_border: # sell
                 pos_rect = self.sell_text.get_rect(midleft = (self.main_rect.left + 150, bg_rect.centery))
                 self.display_surface.blit(self.sell_text, pos_rect)
+            elif self.index == len(self.options) - 1:  # 집 확장
+                pos_rect = self.buy_text.get_rect(midleft=(self.main_rect.left + 250, bg_rect.centery))
+                self.display_surface.blit(self.buy_text, pos_rect)
             else: # buy
                 pos_rect = self.buy_text.get_rect(midleft = (self.main_rect.left + 150, bg_rect.centery))
                 self.display_surface.blit(self.buy_text, pos_rect)
@@ -121,6 +133,6 @@ class Menu:
 
         for text_index, text_surf in enumerate(self.text_surfs):
             top = self.main_rect.top + text_index * (text_surf.get_height() + (self.padding * 2) + self.space)
-            amount_list = list(self.player.item_inventory.values()) + list(self.player.seed_inventory.values())
-            amount = amount_list[text_index]
+            amount_list = list(self.player.item_inventory.values()) + list(self.player.seed_inventory.values()) + [200]
+            amount = amount_list[text_index] if text_index < len(amount_list) else None
             self.show_entry(text_surf, amount, top, self.index == text_index)
