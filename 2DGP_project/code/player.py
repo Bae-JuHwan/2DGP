@@ -137,8 +137,8 @@ class Player(pygame.sprite.Sprite):
             else:
                 self.direction.x = 0
 
-            if keys[pygame.K_ESCAPE]:
-                pygame.quit()
+            # if keys[pygame.K_ESCAPE]:
+            #     pygame.quit()
 
             # tool use
             if keys[pygame.K_SPACE]:
